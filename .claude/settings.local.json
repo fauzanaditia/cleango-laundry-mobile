@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node drive_admin4.js)",
+      "Bash(node drive_admin6.js)",
+      "Bash(node drive_admin7.js)",
+      "Bash(node drive_admin8.js)",
+      "Bash(node debug_service.js)",
+      "Bash(node drive_admin9.js)",
+      "Bash(node drive_admin10.js)",
+      "Bash(node drive_admin11.js)",
+      "Bash(node drive_admin12.js)",
+      "Bash(node drive_admin13.js)",
+      "Bash(cd \"d:/Semester VIII/PPBCS\" && ls -la 2>&1)",
+      "Read(//d/Semester VIII/PPBCS/**)"
+    ]
+  }
+}

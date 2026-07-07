@@ -1,0 +1,210 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../controllers/order_controller.dart';
+import '../../models/laundry_status_log.dart';
+import '../../models/order.dart';
+import 'order_draft.dart';
+import 'ready_for_pickup_screen.dart';
+
+class StatusOrderScreen extends StatefulWidget {
+  const StatusOrderScreen({super.key, required this.orderId});
+
+  final int orderId;
+
+  @override
+  State<StatusOrderScreen> createState() => _StatusOrderScreenState();
+}
+
+class _StatusOrderScreenState extends State<StatusOrderScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderController>().loadOrderDetail(widget.orderId);
+    });
+  }
+
+  LaundryStatusLog? _logFor(List<LaundryStatusLog> logs, OrderStatus status) {
+    for (final log in logs) {
+      if (log.status == status) return log;
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final orderController = context.watch<OrderController>();
+    final detail = orderController.orderDetail;
+    final loadingDifferentOrder = detail == null || detail.order.id != widget.orderId;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: const Color(0xFF14224D),
+        title: const Text('Status Order'),
+      ),
+      body: (orderController.isLoading || loadingDifferentOrder)
+          ? (orderController.errorMessage != null
+              ? Center(child: Text(orderController.errorMessage!))
+              : const Center(child: CircularProgressIndicator()))
+          : _buildBody(context, detail.order, detail.statusLogs),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, Order order, List<LaundryStatusLog> logs) {
+    final isCancelled = order.status == OrderStatus.dibatalkan;
+    final currentIndex = orderProcessStages.indexOf(order.status);
+    final cancelledLog = isCancelled ? _logFor(logs, OrderStatus.dibatalkan) : null;
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Text(order.kodeOrder, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 20),
+        for (var i = 0; i < orderProcessStages.length; i++)
+          _TimelineStep(
+            label: orderStatusLabel(orderProcessStages[i]),
+            timestamp: _logFor(logs, orderProcessStages[i])?.createdAt,
+            state: i == currentIndex && !isCancelled
+                ? _StepState.current
+                : _logFor(logs, orderProcessStages[i]) != null
+                    ? _StepState.completed
+                    : _StepState.upcoming,
+            isLast: i == orderProcessStages.length - 1 && !isCancelled,
+          ),
+        if (isCancelled)
+          _TimelineStep(
+            label: 'Dibatalkan',
+            timestamp: cancelledLog?.createdAt,
+            state: _StepState.cancelled,
+            isLast: true,
+          ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isCancelled ? const Color(0xFFFDECEA) : const Color(0xFFEAF1FD),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            isCancelled
+                ? 'Pesanan ini telah dibatalkan.${cancelledLog?.keterangan != null ? ' ${cancelledLog!.keterangan}' : ''}'
+                : order.status == OrderStatus.selesai
+                    ? 'Pesanan Anda telah selesai! Siap diambil/diantar.'
+                    : 'Pesanan Anda sedang dalam tahap: ${orderStatusLabel(order.status)}.',
+            style: TextStyle(
+              color: isCancelled ? const Color(0xFFC0392B) : const Color(0xFF14224D),
+            ),
+          ),
+        ),
+        if (order.status == OrderStatus.selesai) ...[
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ReadyForPickupScreen(orderId: order.id),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E6BE6),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size.fromHeight(0),
+            ),
+            child: const Text('KONFIRMASI', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+enum _StepState { completed, current, upcoming, cancelled }
+
+class _TimelineStep extends StatelessWidget {
+  const _TimelineStep({
+    required this.label,
+    required this.timestamp,
+    required this.state,
+    required this.isLast,
+  });
+
+  final String label;
+  final DateTime? timestamp;
+  final _StepState state;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color indicatorColor = switch (state) {
+      _StepState.completed => const Color(0xFF34C759),
+      _StepState.current => const Color(0xFF2E6BE6),
+      _StepState.upcoming => const Color(0xFFBFC5D2),
+      _StepState.cancelled => const Color(0xFFE74C3C),
+    };
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: state == _StepState.upcoming ? Colors.white : indicatorColor,
+                  border: Border.all(color: indicatorColor, width: 2),
+                ),
+                child: state == _StepState.completed
+                    ? const Icon(Icons.check, size: 16, color: Colors.white)
+                    : state == _StepState.cancelled
+                        ? const Icon(Icons.close, size: 16, color: Colors.white)
+                        : null,
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: state == _StepState.completed
+                        ? const Color(0xFF34C759)
+                        : const Color(0xFFE0E3EB),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: state == _StepState.upcoming ? FontWeight.normal : FontWeight.bold,
+                      color: state == _StepState.upcoming ? Colors.grey : const Color(0xFF14224D),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    timestamp != null ? formatTanggalWaktuIndo(timestamp!) : 'Menunggu',
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
