@@ -85,7 +85,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               children: [
                 _Row('Layanan', draft.layanan),
                 const SizedBox(height: 10),
-                _Row('Paket', '${draft.service?.name ?? '-'} (${draft.service != null ? formatDurationLabel(draft.service!.duration) : '-'})'),
+                _Row('Paket', '${draft.service?.namaLayanan ?? '-'} (${draft.service != null ? formatDurationLabel(draft.service!.estimasiHari) : '-'})'),
                 const SizedBox(height: 10),
                 _Row('Berat', '${draft.berat.toStringAsFixed(0)} Kg'),
                 const SizedBox(height: 10),

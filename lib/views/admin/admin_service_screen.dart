@@ -175,19 +175,19 @@ class _AdminServiceScreenState extends State<AdminServiceScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${service.name} (${formatDurationLabel(service.duration)})',
+                                    '${service.namaLayanan} (${formatDurationLabel(service.estimasiHari)})',
                                     style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                  if (service.description != null)
+                                  if (service.deskripsi != null)
                                     Text(
-                                      service.description!,
+                                      service.deskripsi!,
                                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                                     ),
                                 ],
                               ),
                             ),
                             Text(
-                              '${formatRupiah(service.price)}/Kg',
+                              '${formatRupiah(service.hargaPerKg)}/Kg',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],

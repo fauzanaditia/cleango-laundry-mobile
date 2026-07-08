@@ -57,9 +57,9 @@ class _ChoosePackageScreenState extends State<ChoosePackageScreen> {
   @override
   Widget build(BuildContext context) {
     final serviceController = context.watch<ServiceController>();
-    final subtotal = (_selectedService?.price ?? 0) * _berat;
+    final subtotal = (_selectedService?.hargaPerKg ?? 0) * _berat;
     final estimasiLabel = _selectedService != null
-        ? formatDurationLabel(_selectedService!.duration)
+        ? formatDurationLabel(_selectedService!.estimasiHari)
         : '-';
 
     return Scaffold(
@@ -192,19 +192,19 @@ class _PackageCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    service.name,
+                    service.namaLayanan,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${formatDurationLabel(service.duration)} Selesai',
+                    '${formatDurationLabel(service.estimasiHari)} Selesai',
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ],
               ),
             ),
             Text(
-              '${formatRupiah(service.price)}/Kg',
+              '${formatRupiah(service.hargaPerKg)}/Kg',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ],

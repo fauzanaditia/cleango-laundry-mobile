@@ -29,14 +29,14 @@ class OrderDraft {
   Service? service;
   double berat;
 
-  double get hargaPerKg => service?.price ?? 0;
+  double get hargaPerKg => service?.hargaPerKg ?? 0;
   double get subtotal => berat * hargaPerKg;
   double get biayaAntarJemput =>
       pickupType == PickupType.antarKeAlamat ? kBiayaAntarJemput : 0;
   double get totalBayar => subtotal + biayaAntarJemput;
 
   DateTime get estimasiSelesai =>
-      tanggalOrder.add(Duration(hours: service?.duration ?? 0));
+      tanggalOrder.add(Duration(hours: service?.estimasiHari ?? 0));
 }
 
 String formatDurationLabel(int hours) {

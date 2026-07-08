@@ -115,7 +115,7 @@ class _OrderHistoryDetailScreenState extends State<OrderHistoryDetailScreen> {
             children: [
               for (final item in detail.items) ...[
                 _Row(
-                  _findService(services, item.serviceId)?.name ?? 'Paket',
+                  _findService(services, item.serviceId)?.namaLayanan ?? 'Paket',
                   '${item.berat.toStringAsFixed(0)} Kg x ${formatRupiah(item.harga)}',
                 ),
                 const SizedBox(height: 10),

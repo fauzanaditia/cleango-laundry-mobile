@@ -68,10 +68,10 @@ class ServiceService {
     final now = DateTime.now();
     final service = Service(
       id: MockData.nextServiceId++,
-      name: name,
-      price: price,
-      duration: duration,
-      description: description,
+      namaLayanan: name,
+      hargaPerKg: price,
+      estimasiHari: duration,
+      deskripsi: description,
       createdAt: now,
       updatedAt: now,
     );
@@ -103,10 +103,11 @@ class ServiceService {
     final now = DateTime.now();
     return Service(
       id: json['id'] is int ? json['id'] as int : int.tryParse('${json['id']}') ?? 0,
-      name: json['name']?.toString() ?? '',
-      price: _asDouble(json['price']),
-      duration: _asInt(json['duration']),
-      description: json['description']?.toString(),
+      namaLayanan: json['nama_layanan']?.toString() ?? '',
+      // harga_per_kg dikirim API sebagai string, mis. "7000.00".
+      hargaPerKg: _asDouble(json['harga_per_kg']),
+      estimasiHari: _asInt(json['estimasi_hari']),
+      deskripsi: json['deskripsi']?.toString(),
       createdAt: _parseDate(json['created_at']) ?? now,
       updatedAt: _parseDate(json['updated_at']) ?? now,
     );
