@@ -16,7 +16,6 @@ class OrderController extends ChangeNotifier {
   OrderDetail? orderDetail;
 
   Future<Order?> createOrder({
-    required int userId,
     required PickupType pickupType,
     required List<OrderItemInput> items,
     String? catatan,
@@ -27,7 +26,6 @@ class OrderController extends ChangeNotifier {
 
     try {
       final order = await _orderService.createOrder(
-        userId: userId,
         pickupType: pickupType,
         items: items,
         catatan: catatan,
@@ -44,13 +42,13 @@ class OrderController extends ChangeNotifier {
     }
   }
 
-  Future<void> loadOrders({int? userId}) async {
+  Future<void> loadOrders() async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      orders = await _orderService.getOrders(userId: userId);
+      orders = await _orderService.getOrders();
     } catch (e) {
       errorMessage = _extractMessage(e);
     } finally {
@@ -73,8 +71,6 @@ class OrderController extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  String customerName(int userId) => _orderService.getCustomerName(userId);
 
   String _extractMessage(Object e) => e.toString().replaceFirst('Exception: ', '');
 }

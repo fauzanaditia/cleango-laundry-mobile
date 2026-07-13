@@ -17,21 +17,27 @@ class LaundryStatusLog {
 
   factory LaundryStatusLog.fromJson(Map<String, dynamic> json) {
     return LaundryStatusLog(
-      id: json['id'] as int,
-      orderId: json['orderId'] as int,
+      id: _asInt(json['id']),
+      orderId: _asInt(json['order_id']),
       status: OrderStatusX.fromJson(json['status'] as String),
       keterangan: json['keterangan'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'orderId': orderId,
+      'order_id': orderId,
       'status': status.toJson(),
       'keterangan': keterangan,
-      'createdAt': createdAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
     };
   }
+}
+
+int _asInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse('$value') ?? 0;
 }

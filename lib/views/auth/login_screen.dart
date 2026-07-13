@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
-import '../admin/admin_login_screen.dart';
 import '../customer/dashboard_screen.dart';
 import 'register_screen.dart';
 import 'widgets/auth_text_field.dart';
@@ -163,20 +162,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
-                      );
-                    },
-                    child: const Text(
-                      'Login sebagai Admin',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ),
                 ),

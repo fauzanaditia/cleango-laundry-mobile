@@ -1,12 +1,11 @@
 enum OrderStatus {
-  baru,
-  diterima,
+  menunggu,
+  diproses,
   dicuci,
   dikeringkan,
   disetrika,
-  qualityCheck,
   selesai,
-  dibatalkan,
+  diambil,
 }
 
 enum PickupType {
@@ -15,24 +14,70 @@ enum PickupType {
 }
 
 extension OrderStatusX on OrderStatus {
-  String toJson() => name;
+  // Nilai enum backend persis case-sensitive: Menunggu, Diproses, Dicuci,
+  // Dikeringkan, Disetrika, Selesai, Diambil.
+  String toJson() {
+    switch (this) {
+      case OrderStatus.menunggu:
+        return 'Menunggu';
+      case OrderStatus.diproses:
+        return 'Diproses';
+      case OrderStatus.dicuci:
+        return 'Dicuci';
+      case OrderStatus.dikeringkan:
+        return 'Dikeringkan';
+      case OrderStatus.disetrika:
+        return 'Disetrika';
+      case OrderStatus.selesai:
+        return 'Selesai';
+      case OrderStatus.diambil:
+        return 'Diambil';
+    }
+  }
 
   static OrderStatus fromJson(String value) {
-    return OrderStatus.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => throw ArgumentError('Unknown OrderStatus: $value'),
-    );
+    switch (value) {
+      case 'Menunggu':
+        return OrderStatus.menunggu;
+      case 'Diproses':
+        return OrderStatus.diproses;
+      case 'Dicuci':
+        return OrderStatus.dicuci;
+      case 'Dikeringkan':
+        return OrderStatus.dikeringkan;
+      case 'Disetrika':
+        return OrderStatus.disetrika;
+      case 'Selesai':
+        return OrderStatus.selesai;
+      case 'Diambil':
+        return OrderStatus.diambil;
+      default:
+        throw ArgumentError('Unknown OrderStatus: $value');
+    }
   }
 }
 
 extension PickupTypeX on PickupType {
-  String toJson() => name;
+  // Nilai enum backend: 'Jemput' (ambil di store/jemput sendiri) dan
+  // 'Antar' (diantar ke alamat). Tidak terkait dengan label UI.
+  String toJson() {
+    switch (this) {
+      case PickupType.ambilDiStore:
+        return 'Jemput';
+      case PickupType.antarKeAlamat:
+        return 'Antar';
+    }
+  }
 
   static PickupType fromJson(String value) {
-    return PickupType.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => throw ArgumentError('Unknown PickupType: $value'),
-    );
+    switch (value) {
+      case 'Jemput':
+        return PickupType.ambilDiStore;
+      case 'Antar':
+        return PickupType.antarKeAlamat;
+      default:
+        throw ArgumentError('Unknown PickupType: $value');
+    }
   }
 }
 
@@ -65,35 +110,48 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: json['id'] as int,
-      kodeOrder: json['kodeOrder'] as String,
-      userId: json['userId'] as int,
-      tanggalOrder: DateTime.parse(json['tanggalOrder'] as String),
+      id: _asInt(json['id']),
+      kodeOrder: json['kode_order'] as String,
+      userId: _asInt(json['user_id']),
+      tanggalOrder: DateTime.parse(json['tanggal_order'] as String),
       status: OrderStatusX.fromJson(json['status'] as String),
-      pickupType: PickupTypeX.fromJson(json['pickupType'] as String),
-      estimasiSelesai: json['estimasiSelesai'] != null
-          ? DateTime.parse(json['estimasiSelesai'] as String)
+      pickupType: PickupTypeX.fromJson(json['pickup_type'] as String),
+      estimasiSelesai: json['estimasi_selesai'] != null
+          ? DateTime.parse(json['estimasi_selesai'] as String)
           : null,
-      totalHarga: (json['totalHarga'] as num).toDouble(),
+      // total_harga dikirim API sebagai string, mis. "42000.00".
+      totalHarga: _asDouble(json['total_harga']),
       catatan: json['catatan'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'kodeOrder': kodeOrder,
-      'userId': userId,
-      'tanggalOrder': tanggalOrder.toIso8601String(),
+      'kode_order': kodeOrder,
+      'user_id': userId,
+      'tanggal_order': tanggalOrder.toIso8601String(),
       'status': status.toJson(),
-      'pickupType': pickupType.toJson(),
-      'estimasiSelesai': estimasiSelesai?.toIso8601String(),
-      'totalHarga': totalHarga,
+      'pickup_type': pickupType.toJson(),
+      'estimasi_selesai': estimasiSelesai?.toIso8601String(),
+      'total_harga': totalHarga,
       'catatan': catatan,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
+}
+
+int _asInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse('$value') ?? 0;
+}
+
+double _asDouble(dynamic value) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  return double.tryParse('$value') ?? 0;
 }

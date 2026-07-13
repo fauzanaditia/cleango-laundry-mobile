@@ -70,36 +70,36 @@ final _rupiahFormat = NumberFormat.currency(
 
 String formatRupiah(num value) => _rupiahFormat.format(value);
 
-/// Enam tahapan proses laundry yang ditampilkan pada timeline Status Order.
+/// Tujuh tahapan proses laundry yang ditampilkan pada timeline Status Order.
 const orderProcessStages = [
-  OrderStatus.diterima,
+  OrderStatus.menunggu,
+  OrderStatus.diproses,
   OrderStatus.dicuci,
   OrderStatus.dikeringkan,
   OrderStatus.disetrika,
-  OrderStatus.qualityCheck,
   OrderStatus.selesai,
+  OrderStatus.diambil,
 ];
 
 const _statusLabels = {
-  OrderStatus.baru: 'Baru',
-  OrderStatus.diterima: 'Diterima',
+  OrderStatus.menunggu: 'Menunggu',
+  OrderStatus.diproses: 'Diproses',
   OrderStatus.dicuci: 'Dicuci',
   OrderStatus.dikeringkan: 'Dikeringkan',
   OrderStatus.disetrika: 'Disetrika',
-  OrderStatus.qualityCheck: 'Quality Check',
   OrderStatus.selesai: 'Selesai',
-  OrderStatus.dibatalkan: 'Dibatalkan',
+  OrderStatus.diambil: 'Diambil',
 };
 
 String orderStatusLabel(OrderStatus status) => _statusLabels[status] ?? status.name;
 
-/// Label ringkas untuk badge di list Riwayat Order: Selesai / Dibatalkan / Proses.
+/// Label ringkas untuk badge di list Riwayat Order: Selesai / Proses.
+/// Backend belum punya status batal, jadi belum ada bucket 'Dibatalkan'.
 String orderStatusBucketLabel(OrderStatus status) {
   switch (status) {
     case OrderStatus.selesai:
+    case OrderStatus.diambil:
       return 'Selesai';
-    case OrderStatus.dibatalkan:
-      return 'Dibatalkan';
     default:
       return 'Proses';
   }
@@ -108,19 +108,34 @@ String orderStatusBucketLabel(OrderStatus status) {
 Color orderStatusBucketColor(OrderStatus status) {
   switch (status) {
     case OrderStatus.selesai:
+    case OrderStatus.diambil:
       return const Color(0xFF34C759);
-    case OrderStatus.dibatalkan:
-      return const Color(0xFFE74C3C);
     default:
       return const Color(0xFFF5A623);
   }
 }
 
 bool isOrderInProses(OrderStatus status) =>
-    status != OrderStatus.selesai && status != OrderStatus.dibatalkan;
+    status != OrderStatus.selesai && status != OrderStatus.diambil;
 
-String paymentStatusLabel(PaymentStatus status) =>
-    status == PaymentStatus.lunas ? 'LUNAS' : 'BELUM LUNAS';
+String paymentStatusLabel(PaymentStatus status) {
+  switch (status) {
+    case PaymentStatus.lunas:
+      return 'LUNAS';
+    case PaymentStatus.gagal:
+      return 'GAGAL';
+    case PaymentStatus.pending:
+      return 'BELUM LUNAS';
+  }
+}
 
-Color paymentStatusColor(PaymentStatus status) =>
-    status == PaymentStatus.lunas ? const Color(0xFF34C759) : const Color(0xFFF5A623);
+Color paymentStatusColor(PaymentStatus status) {
+  switch (status) {
+    case PaymentStatus.lunas:
+      return const Color(0xFF34C759);
+    case PaymentStatus.gagal:
+      return const Color(0xFFE74C3C);
+    case PaymentStatus.pending:
+      return const Color(0xFFF5A623);
+  }
+}

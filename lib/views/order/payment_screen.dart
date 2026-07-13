@@ -5,12 +5,11 @@ import '../../controllers/payment_controller.dart';
 import '../../models/payment.dart';
 import 'order_draft.dart';
 import 'order_success_screen.dart';
+import 'payment_confirmation_screen.dart';
 
 const _metodeLabels = {
-  PaymentMethod.tunai: 'Tunai',
-  PaymentMethod.transferBank: 'Transfer Bank',
+  PaymentMethod.cash: 'Tunai',
   PaymentMethod.qris: 'QRIS',
-  PaymentMethod.eWallet: 'E-Wallet',
 };
 
 class PaymentScreen extends StatefulWidget {
@@ -34,14 +33,7 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final _catatanController = TextEditingController();
-  PaymentMethod _metode = PaymentMethod.tunai;
-
-  @override
-  void dispose() {
-    _catatanController.dispose();
-    super.dispose();
-  }
+  PaymentMethod _metode = PaymentMethod.cash;
 
   Future<void> _bayarSekarang() async {
     final paymentController = context.read<PaymentController>();
@@ -49,25 +41,35 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final success = await paymentController.createPayment(
       orderId: widget.orderId,
       metode: _metode,
-      jumlahBayar: widget.totalBayar,
-      catatan: _catatanController.text.trim().isEmpty
-          ? null
-          : _catatanController.text.trim(),
     );
 
     if (!mounted) return;
 
     if (success) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => OrderSuccessScreen(
-            kodeOrder: widget.kodeOrder,
-            tanggalOrder: widget.tanggalOrder,
-            estimasiSelesai: widget.estimasiSelesai,
+      if (_metode == PaymentMethod.cash) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => OrderSuccessScreen(
+              kodeOrder: widget.kodeOrder,
+              tanggalOrder: widget.tanggalOrder,
+              estimasiSelesai: widget.estimasiSelesai,
+            ),
           ),
-        ),
-        (route) => route.isFirst,
-      );
+          (route) => route.isFirst,
+        );
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PaymentConfirmationScreen(
+              orderId: widget.orderId,
+              kodeOrder: widget.kodeOrder,
+              tanggalOrder: widget.tanggalOrder,
+              estimasiSelesai: widget.estimasiSelesai,
+              metode: _metodeLabels[_metode]!,
+            ),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(paymentController.errorMessage ?? 'Pembayaran gagal')),
@@ -114,25 +116,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   )
                   .toList(),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text('Catatan (Opsional)', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE0E3EB)),
-            ),
-            child: TextField(
-              controller: _catatanController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Contoh: Bayar di tempat',
-              ),
             ),
           ),
           const SizedBox(height: 28),

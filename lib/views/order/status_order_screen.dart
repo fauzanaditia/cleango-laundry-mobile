@@ -55,9 +55,7 @@ class _StatusOrderScreenState extends State<StatusOrderScreen> {
   }
 
   Widget _buildBody(BuildContext context, Order order, List<LaundryStatusLog> logs) {
-    final isCancelled = order.status == OrderStatus.dibatalkan;
     final currentIndex = orderProcessStages.indexOf(order.status);
-    final cancelledLog = isCancelled ? _logFor(logs, OrderStatus.dibatalkan) : null;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -68,36 +66,27 @@ class _StatusOrderScreenState extends State<StatusOrderScreen> {
           _TimelineStep(
             label: orderStatusLabel(orderProcessStages[i]),
             timestamp: _logFor(logs, orderProcessStages[i])?.createdAt,
-            state: i == currentIndex && !isCancelled
+            state: i == currentIndex
                 ? _StepState.current
                 : _logFor(logs, orderProcessStages[i]) != null
                     ? _StepState.completed
                     : _StepState.upcoming,
-            isLast: i == orderProcessStages.length - 1 && !isCancelled,
-          ),
-        if (isCancelled)
-          _TimelineStep(
-            label: 'Dibatalkan',
-            timestamp: cancelledLog?.createdAt,
-            state: _StepState.cancelled,
-            isLast: true,
+            isLast: i == orderProcessStages.length - 1,
           ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isCancelled ? const Color(0xFFFDECEA) : const Color(0xFFEAF1FD),
+            color: const Color(0xFFEAF1FD),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            isCancelled
-                ? 'Pesanan ini telah dibatalkan.${cancelledLog?.keterangan != null ? ' ${cancelledLog!.keterangan}' : ''}'
+            order.status == OrderStatus.diambil
+                ? 'Pesanan Anda telah diambil/diterima. Terima kasih!'
                 : order.status == OrderStatus.selesai
                     ? 'Pesanan Anda telah selesai! Siap diambil/diantar.'
                     : 'Pesanan Anda sedang dalam tahap: ${orderStatusLabel(order.status)}.',
-            style: TextStyle(
-              color: isCancelled ? const Color(0xFFC0392B) : const Color(0xFF14224D),
-            ),
+            style: const TextStyle(color: Color(0xFF14224D)),
           ),
         ),
         if (order.status == OrderStatus.selesai) ...[
@@ -125,7 +114,7 @@ class _StatusOrderScreenState extends State<StatusOrderScreen> {
   }
 }
 
-enum _StepState { completed, current, upcoming, cancelled }
+enum _StepState { completed, current, upcoming }
 
 class _TimelineStep extends StatelessWidget {
   const _TimelineStep({
@@ -146,7 +135,6 @@ class _TimelineStep extends StatelessWidget {
       _StepState.completed => const Color(0xFF34C759),
       _StepState.current => const Color(0xFF2E6BE6),
       _StepState.upcoming => const Color(0xFFBFC5D2),
-      _StepState.cancelled => const Color(0xFFE74C3C),
     };
 
     return IntrinsicHeight(
@@ -165,9 +153,7 @@ class _TimelineStep extends StatelessWidget {
                 ),
                 child: state == _StepState.completed
                     ? const Icon(Icons.check, size: 16, color: Colors.white)
-                    : state == _StepState.cancelled
-                        ? const Icon(Icons.close, size: 16, color: Colors.white)
-                        : null,
+                    : null,
               ),
               if (!isLast)
                 Expanded(

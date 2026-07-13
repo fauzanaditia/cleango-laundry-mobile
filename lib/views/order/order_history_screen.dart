@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/auth_controller.dart';
 import '../../controllers/order_controller.dart';
 import '../../models/order.dart';
 import '../customer/profile_screen.dart';
@@ -25,8 +24,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userId = context.read<AuthController>().currentUser?.id;
-      context.read<OrderController>().loadOrders(userId: userId);
+      context.read<OrderController>().loadOrders();
     });
   }
 
@@ -35,9 +33,13 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       case 1:
         return orders.where((o) => isOrderInProses(o.status)).toList();
       case 2:
-        return orders.where((o) => o.status == OrderStatus.selesai).toList();
+        return orders
+            .where((o) => o.status == OrderStatus.selesai || o.status == OrderStatus.diambil)
+            .toList();
       case 3:
-        return orders.where((o) => o.status == OrderStatus.dibatalkan).toList();
+        // Backend belum punya status batal, tab ini akan selalu kosong untuk
+        // sementara sampai status tersebut ditambahkan lagi.
+        return const [];
       default:
         return orders;
     }

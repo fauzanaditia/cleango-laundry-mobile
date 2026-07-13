@@ -4,12 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../controllers/dashboard_controller.dart';
-import '../../controllers/order_controller.dart';
-import '../../models/order.dart';
 import '../order/create_order_screen.dart';
-import '../order/order_draft.dart';
 import '../order/order_history_screen.dart';
-import '../order/status_order_screen.dart';
+import '../order/status_order_list_screen.dart';
 import 'profile_screen.dart';
 import 'widgets/customer_bottom_nav.dart';
 
@@ -35,29 +32,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Future<void> _openStatusOrder() async {
-    final userId = context.read<AuthController>().currentUser?.id;
-    final orderController = context.read<OrderController>();
-    await orderController.loadOrders(userId: userId);
-    if (!mounted) return;
-
-    Order? activeOrder;
-    for (final order in orderController.orders) {
-      if (isOrderInProses(order.status)) {
-        activeOrder = order;
-        break;
-      }
-    }
-
-    if (activeOrder != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => StatusOrderScreen(orderId: activeOrder!.id)),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tidak ada order yang sedang diproses saat ini')),
-      );
-    }
+  void _openStatusOrder() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const StatusOrderListScreen()),
+    );
   }
 
   void _onBottomNavTap(int index) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/auth_controller.dart';
 import '../../controllers/order_controller.dart';
 import '../../services/order_service.dart';
 import 'order_draft.dart';
@@ -20,13 +19,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Future<void> _lanjutKePembayaran() async {
     final draft = widget.draft;
     final orderController = context.read<OrderController>();
-    final authController = context.read<AuthController>();
-    final userId = authController.currentUser?.id;
 
-    if (userId == null || draft.service == null) return;
+    if (draft.service == null) return;
 
     final order = await orderController.createOrder(
-      userId: userId,
       pickupType: draft.pickupType,
       catatan: draft.catatan,
       items: [

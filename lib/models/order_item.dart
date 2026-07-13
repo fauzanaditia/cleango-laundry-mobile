@@ -23,29 +23,42 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      id: json['id'] as int,
-      orderId: json['orderId'] as int,
-      serviceId: json['serviceId'] as int,
-      berat: (json['berat'] as num).toDouble(),
-      qty: json['qty'] as int,
-      harga: (json['harga'] as num).toDouble(),
-      subtotal: (json['subtotal'] as num).toDouble(),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      id: _asInt(json['id']),
+      orderId: _asInt(json['order_id']),
+      serviceId: _asInt(json['service_id']),
+      // berat/harga/subtotal dikirim API sebagai string, mis. "6.00".
+      berat: _asDouble(json['berat']),
+      qty: _asInt(json['qty']),
+      harga: _asDouble(json['harga']),
+      subtotal: _asDouble(json['subtotal']),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'orderId': orderId,
-      'serviceId': serviceId,
+      'order_id': orderId,
+      'service_id': serviceId,
       'berat': berat,
       'qty': qty,
       'harga': harga,
       'subtotal': subtotal,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
+}
+
+int _asInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse('$value') ?? 0;
+}
+
+double _asDouble(dynamic value) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  return double.tryParse('$value') ?? 0;
 }
