@@ -5,11 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/payment.dart';
-import 'mock_data.dart';
 
-/// Klien PaymentService. [createPayment]/[confirmPayment] terhubung ke API
-/// Laravel sungguhan; [getPaymentStatus] masih memakai data tiruan (belum
-/// ada endpoint status pembayaran di API).
+/// Klien PaymentService, terhubung ke API Laravel sungguhan.
 ///
 /// [baseUrl] default menunjuk ke 127.0.0.1 untuk pengujian di Flutter
 /// web/desktop. Override lewat constructor saat menjalankan di Android
@@ -105,16 +102,41 @@ class PaymentService {
   }
 
   Future<PaymentStatus> getPaymentStatus(int orderId) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_tokenKey);
 
-    final orderPayments = MockData.payments.where((p) => p.orderId == orderId).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    if (token == null) {
+      throw Exception('Anda belum login, silakan login terlebih dahulu');
+    }
 
-    if (orderPayments.isEmpty) {
+    http.Response response;
+    try {
+      response = await http
+          .get(
+            Uri.parse('$_baseUrl/orders/$orderId/payment'),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(_timeout);
+    } on TimeoutException {
+      throw Exception('Waktu koneksi ke server habis, silakan coba lagi');
+    } on http.ClientException {
+      throw Exception('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+    }
+
+    final decoded = _decodeRaw(response);
+
+    if (response.statusCode == 200) {
+      return Payment.fromJson(_extractObject(decoded)).status;
+    }
+
+    if (response.statusCode == 404) {
       return PaymentStatus.pending;
     }
 
-    return orderPayments.first.status;
+    throw _errorFor(response.statusCode, decoded is Map<String, dynamic> ? decoded : {});
   }
 
   dynamic _decodeRaw(http.Response response) {

@@ -5,7 +5,6 @@ import 'controllers/auth_controller.dart';
 import 'controllers/dashboard_controller.dart';
 import 'controllers/order_controller.dart';
 import 'controllers/payment_controller.dart';
-import 'controllers/profile_controller.dart';
 import 'controllers/service_controller.dart';
 import 'views/auth/login_screen.dart';
 
@@ -25,7 +24,6 @@ class CleanGoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ServiceController()),
         ChangeNotifierProvider(create: (_) => OrderController()),
         ChangeNotifierProvider(create: (_) => PaymentController()),
-        ChangeNotifierProvider(create: (_) => ProfileController()),
       ],
       child: MaterialApp(
         title: 'CleanGo Laundry',

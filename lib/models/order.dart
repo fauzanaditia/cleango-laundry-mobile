@@ -1,3 +1,5 @@
+import 'payment.dart';
+
 enum OrderStatus {
   menunggu,
   diproses,
@@ -8,10 +10,7 @@ enum OrderStatus {
   diambil,
 }
 
-enum PickupType {
-  ambilDiStore,
-  antarKeAlamat,
-}
+enum PickupType { ambilDiStore, antarKeAlamat }
 
 extension OrderStatusX on OrderStatus {
   // Nilai enum backend persis case-sensitive: Menunggu, Diproses, Dicuci,
@@ -93,6 +92,7 @@ class Order {
   final String? catatan;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final Payment? payment;
 
   Order({
     required this.id,
@@ -106,7 +106,11 @@ class Order {
     this.catatan,
     required this.createdAt,
     required this.updatedAt,
+    this.payment,
   });
+
+  PaymentStatus get paymentStatus =>
+      payment?.status ?? PaymentStatus.pending;
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
@@ -124,6 +128,9 @@ class Order {
       catatan: json['catatan'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      payment: json['payment'] != null
+          ? Payment.fromJson(json['payment'] as Map<String, dynamic>)
+          : null,
     );
   }
 

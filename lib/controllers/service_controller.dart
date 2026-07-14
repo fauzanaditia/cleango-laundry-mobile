@@ -28,33 +28,4 @@ class ServiceController extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  Future<bool> createService({
-    required String name,
-    required double price,
-    required int duration,
-    String? description,
-  }) async {
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
-
-    try {
-      final service = await _serviceService.createService(
-        name: name,
-        price: price,
-        duration: duration,
-        description: description,
-      );
-      services = [...services, service];
-      isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      errorMessage = e.toString().replaceFirst('Exception: ', '');
-      isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
 }

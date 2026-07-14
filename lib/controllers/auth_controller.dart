@@ -71,6 +71,24 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateProfile(String name) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      currentUser = await _authService.updateProfile(name);
+      isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = _extractMessage(e);
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     isLoading = true;
     errorMessage = null;

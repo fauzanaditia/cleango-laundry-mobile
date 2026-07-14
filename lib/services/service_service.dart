@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/service.dart';
-import 'mock_data.dart';
 
 /// Klien ServiceService yang terhubung ke API Laravel sungguhan untuk
 /// pengambilan daftar paket layanan.
@@ -54,30 +53,6 @@ class ServiceService {
 
     final errorBody = decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
     throw _errorFor(response.statusCode, errorBody);
-  }
-
-  /// Masih memakai data tiruan (belum ada endpoint tambah paket di API).
-  Future<Service> createService({
-    required String name,
-    required double price,
-    required int duration,
-    String? description,
-  }) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    final now = DateTime.now();
-    final service = Service(
-      id: MockData.nextServiceId++,
-      namaLayanan: name,
-      hargaPerKg: price,
-      estimasiHari: duration,
-      deskripsi: description,
-      createdAt: now,
-      updatedAt: now,
-    );
-
-    MockData.services.add(service);
-    return service;
   }
 
   dynamic _decodeRaw(http.Response response) {

@@ -114,6 +114,41 @@ class AuthService {
     }
   }
 
+  Future<User> updateProfile(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_tokenKey);
+
+    if (token == null) {
+      throw Exception('Anda belum login, silakan login terlebih dahulu');
+    }
+
+    http.Response response;
+    try {
+      response = await http
+          .patch(
+            Uri.parse('$_baseUrl/auth/profile'),
+            headers: {
+              ..._jsonHeaders,
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'name': name}),
+          )
+          .timeout(_timeout);
+    } on TimeoutException {
+      throw Exception('Waktu koneksi ke server habis, silakan coba lagi');
+    } on http.ClientException {
+      throw Exception('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+    }
+
+    final body = _decodeBody(response);
+
+    if (response.statusCode == 200) {
+      return _userFromApiJson(_extractUserJson(body));
+    }
+
+    throw _errorFor(response.statusCode, body);
+  }
+
   Future<http.Response> _post(String path, Map<String, dynamic> body) async {
     try {
       return await http

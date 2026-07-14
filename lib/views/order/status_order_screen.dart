@@ -66,10 +66,11 @@ class _StatusOrderScreenState extends State<StatusOrderScreen> {
           _TimelineStep(
             label: orderStatusLabel(orderProcessStages[i]),
             timestamp: _logFor(logs, orderProcessStages[i])?.createdAt,
-            state: i == currentIndex
-                ? _StepState.current
-                : _logFor(logs, orderProcessStages[i]) != null
-                    ? _StepState.completed
+            keterangan: _logFor(logs, orderProcessStages[i])?.keterangan,
+            state: i < currentIndex
+                ? _StepState.completed
+                : i == currentIndex
+                    ? _StepState.current
                     : _StepState.upcoming,
             isLast: i == orderProcessStages.length - 1,
           ),
@@ -120,12 +121,14 @@ class _TimelineStep extends StatelessWidget {
   const _TimelineStep({
     required this.label,
     required this.timestamp,
+    this.keterangan,
     required this.state,
     required this.isLast,
   });
 
   final String label;
   final DateTime? timestamp;
+  final String? keterangan;
   final _StepState state;
   final bool isLast;
 
@@ -182,9 +185,20 @@ class _TimelineStep extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    timestamp != null ? formatTanggalWaktuIndo(timestamp!) : 'Menunggu',
+                    timestamp != null
+                        ? formatTanggalWaktuIndo(timestamp!)
+                        : state == _StepState.upcoming
+                            ? 'Menunggu'
+                            : 'Sudah dilewati',
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
+                  if (keterangan != null && keterangan!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      keterangan!,
+                      style: const TextStyle(color: Colors.grey, fontSize: 11),
+                    ),
+                  ],
                 ],
               ),
             ),

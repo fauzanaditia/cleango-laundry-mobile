@@ -5,6 +5,7 @@ import '../../controllers/auth_controller.dart';
 import '../auth/login_screen.dart';
 import '../order/create_order_screen.dart';
 import '../order/order_history_screen.dart';
+import 'edit_profile_screen.dart';
 import 'widgets/customer_bottom_nav.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -115,7 +116,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _ProfileMenuTile(
             icon: Icons.settings_outlined,
             label: 'Pengaturan Akun',
-            onTap: () => _showComingSoon('Pengaturan Akun'),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+            ),
           ),
           _ProfileMenuTile(
             icon: Icons.help_outline,
