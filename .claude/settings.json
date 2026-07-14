@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node drive_history4.js)"
-    ]
-  }
-}
